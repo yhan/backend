@@ -11,29 +11,42 @@ namespace backend.Controllers
     [Route("[controller]")]
     public class QuestionsController : ControllerBase
     {
+        private readonly QuizContext _quizContext;
         private readonly ILogger<QuestionsController> _logger;
 
-        public QuestionsController(ILogger<QuestionsController> logger)
+        public QuestionsController(QuizContext quizContext, ILogger<QuestionsController> logger)
         {
             _logger = logger;
+            _quizContext = quizContext;
         }
-
+        
         [HttpPost]
-        public Answer Accept(Question question)
+        public object Accept(Question question)
         {
-            _logger.LogDebug($"Received: {question.Text}");
-            return new Answer();
+            _quizContext.Add(question);
+            _quizContext.SaveChanges(true);
+
+            Inspect(_quizContext);
+
+            return Empty.Instance;
         }
 
+        private void Inspect(QuizContext quizContext)
+        {
+           var ids = string.Join(", ", quizContext.Questions.Select(x => x.Id));
+           _logger.LogDebug($"***DB*** has now: {ids} question");
+        }
+
+
+        [HttpGet]
+        public IEnumerable<Question> All()
+        {
+            return _quizContext.Questions;
+        }
     }
 
-    public class Answer
+    public class Empty
     {
-        public string Text { get; } = "UNIVERSAL RESPONSE :)";
-    }
-
-    public class Question
-    {
-        public string Text { get; set; }
+        public static Empty Instance = new Empty();
     }
 }
