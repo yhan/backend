@@ -24,6 +24,11 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Question question)
         {
+            if (string.IsNullOrWhiteSpace(question.Text))
+            {
+                return BadRequest("Question has no content.");
+            }
+
             _quizContext.Add(question);
             await _quizContext.SaveChangesAsync(true);
 
