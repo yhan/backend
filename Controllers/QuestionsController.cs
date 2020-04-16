@@ -11,12 +11,25 @@ namespace backend.Controllers
     [Route("[controller]")]
     public class QuestionsController : ControllerBase
     {
-        [HttpPost]
-        public string Accept(Question question)
+        private readonly ILogger<QuestionsController> _logger;
+
+        public QuestionsController(ILogger<QuestionsController> logger)
         {
-            return question.Text;
+            _logger = logger;
         }
 
+        [HttpPost]
+        public Answer Accept(Question question)
+        {
+            _logger.LogDebug($"Received: {question.Text}");
+            return new Answer();
+        }
+
+    }
+
+    public class Answer
+    {
+        public string Text { get; } = "UNIVERSAL RESPONSE :)";
     }
 
     public class Question
