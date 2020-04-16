@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Controllers
@@ -21,14 +22,28 @@ namespace backend.Controllers
         }
         
         [HttpPost]
-        public object Accept(Question question)
+        public async Task<IActionResult> Create(Question question)
         {
             _quizContext.Add(question);
-            _quizContext.SaveChanges(true);
+            await _quizContext.SaveChangesAsync(true);
 
             Inspect(_quizContext);
 
-            return Empty.Instance;
+            return Ok(question);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Modify(int id, [FromBody]Question question)
+        {
+            if (id != question.Id)
+            {
+                return BadRequest();
+            }
+
+            _quizContext.Entry(question).State = EntityState.Modified;
+            await _quizContext.SaveChangesAsync();
+
+            return Ok(question);
         }
 
         private void Inspect(QuizContext quizContext)
