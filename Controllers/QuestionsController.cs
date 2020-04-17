@@ -21,14 +21,17 @@ namespace backend.Controllers
             _logger = logger;
             _quizContext = quizContext;
         }
-        
+
+        private bool UnknownQuiz(Question question) => _quizContext.Quiz.SingleOrDefault(q => q.Id == question.QuizId) == null;
+
         [HttpPost]
         public async Task<IActionResult> Create(Question question)
         {
+            if (UnknownQuiz(question))
+                return BadRequest("Quiz unknown");
+
             if (string.IsNullOrWhiteSpace(question.Text))
-            {
                 return BadRequest("Question has no content.");
-            }
 
             _quizContext.Add(question);
             await _quizContext.SaveChangesAsync(true);
@@ -41,10 +44,11 @@ namespace backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Modify(int id, [FromBody]Question question)
         {
+            if (UnknownQuiz(question))
+                return BadRequest("Quiz unknown");
+
             if (id != question.Id)
-            {
                 return BadRequest();
-            }
 
             _quizContext.Entry(question).State = EntityState.Modified;
             await _quizContext.SaveChangesAsync();
@@ -54,8 +58,8 @@ namespace backend.Controllers
 
         private void Inspect(QuizContext quizContext)
         {
-           var ids = string.Join(", ", quizContext.Questions.Select(x => x.Id));
-           _logger.LogDebug($"***DB*** has now: {ids} question");
+            var ids = string.Join(", ", quizContext.Questions.Select(x => x.Id));
+            _logger.LogDebug($"***DB*** has now: {ids} question");
         }
 
 
