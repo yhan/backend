@@ -1,5 +1,7 @@
 using backend.Controllers;
 using Microsoft.EntityFrameworkCore;
+using backend;
+using backend.Models;
 
 namespace backend
 {
@@ -12,5 +14,8 @@ namespace backend
 
         /** Use the same class for DB, Biz and HTTP is a bad idea*/
         public DbSet<Question> Questions { get; set; }
+
+        /** Use the same class for DB, Biz and HTTP is a bad idea*/
+        public DbSet<Quiz> Quiz { get; set; }
     }
 }
