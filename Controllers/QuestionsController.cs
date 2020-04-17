@@ -64,6 +64,12 @@ namespace backend.Controllers
         {
             return _quizContext.Questions;
         }
+
+        [HttpGet("{quizId}")]
+        public IEnumerable<Question> QuestionsOf([FromRoute]int quizId)
+        {
+            return _quizContext.Questions.Where(q => q.QuizId == quizId);
+        }
     }
 
     public class Empty
