@@ -1,7 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Controllers
 {
@@ -29,15 +31,16 @@ namespace backend.Controllers
         {
             var user = new IdentityUser { UserName = credentials.Email, Email = credentials.Email };
 
-            var result = await _userManager.CreateAsync(user, credentials.Password);
+            var result = await _userManager.CreateAsync(user: user, password: credentials.Password);
 
             if (!result.Succeeded)
-                return BadRequest(result.Errors);
+                return BadRequest(error: result.Errors);
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            await _signInManager.SignInAsync(user: user, isPersistent: false);
 
-            var jwt = new JwtSecurityToken();
-            return Ok(new JwtSecurityTokenHandler().WriteToken(jwt));
+            SigningCredentials signingCredentials = new SigningCredentials(key: StrongBox.PassPhrase, algorithm: SecurityAlgorithms.HmacSha256Signature);
+            var jwt = new JwtSecurityToken(issuer: null, audience: null, claims: null, notBefore: null, expires: null, signingCredentials: signingCredentials);
+            return Ok(value: new JwtSecurityTokenHandler().WriteToken(token: jwt));
         }
     }
 }
